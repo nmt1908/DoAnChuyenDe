@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "8220361854",
+    "firebase_url": "https://chuyende-13cb1-default-rtdb.firebaseio.com",
+    "project_id": "chuyende-13cb1",
+    "storage_bucket": "chuyende-13cb1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8220361854:android:217c2ff47cf81687d6442f",
+        "android_client_info": {
+          "package_name": "com.doanchuyendedidong"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaar-rBUCVbwnReTqYNvx_tpoCKPHkUeg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

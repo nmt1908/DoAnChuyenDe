@@ -6,10 +6,18 @@ import HomeTab from './component/HomeTab';  // Import HomeTab vừa tạo
 import Icon from 'react-native-vector-icons/Ionicons';  // Thư viện icon
 import Feather from 'react-native-vector-icons/Feather';
 import CustomDrawerContent from './component/CustomDrawerContent';
+import LoginScreen from './screen/auth/LoginScreen';
+import SplashScreen from './screen/SplashScreen';
+import DetailProductScreen from './screen/DetailProductScreen';
+import AdminHomeScreen from './screen/admin/AdminHomeScreen';
+import { UserProvider } from '../DoAnChuyenDeDiDong/UserContext';
+
+
 const Drawer = createDrawerNavigator();
 
 // Tạo Header Tùy Chỉnh
 const CustomHeader = ({ navigation }) => {
+  
   const [searchText, setSearchText] = useState('');
   return (
     <View style={styles.headerContainer}>
@@ -43,38 +51,62 @@ const CustomHeader = ({ navigation }) => {
   );
 };
 
-// Trang Home (HomeScreen)
-const HomeScreen = ({ navigation }) => {
-  return (
-    <View style={{ flex: 1 }}>
-      {/* Hiển thị Header Tùy Chỉnh */}
-      <CustomHeader navigation={navigation} />
-      {/* Nội dung trang */}
-      <Text style={{ padding: 20 }}>Nội dung Trang chủ</Text>
-    </View>
-  );
-};
+
 
 // Tạo Drawer Navigator kết hợp với Bottom Tab
 export default function App() {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} />}  // Sử dụng nội dung Drawer tùy chỉnh
-      >
-        {/* Đăng ký màn hình chính */}
-        <Drawer.Screen
-          name="HomeTab"
-          component={HomeTab}
-          options={{
-            header: ({ navigation }) => <CustomHeader navigation={navigation} />,
-            headerShown: true,  // Hiển thị header tùy chỉnh
-          }}
-        />
-        
+    <UserProvider>
+      <NavigationContainer>
+        <Drawer.Navigator
+          drawerContent={(props) => <CustomDrawerContent {...props} />}  // Sử dụng nội dung Drawer tùy chỉnh
+        >
+          {/* Đăng ký màn hình chính */}
+          <Drawer.Screen
+            name="SplashScreen"
+            component={SplashScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="HomeTab"
+            component={HomeTab}
+            options={{
+              header: ({ navigation }) => <CustomHeader navigation={navigation} />,
+              headerShown: true,  // Hiển thị header tùy chỉnh
+            }}
+          />
 
-      </Drawer.Navigator>
-    </NavigationContainer>
+          
+
+          <Drawer.Screen
+            name="LoginScreen"
+            component={LoginScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="AdminHomeScreen"
+            component={AdminHomeScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="DetailProductScreen"
+            component={DetailProductScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+
+
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </UserProvider>
+
   );
 }
 
