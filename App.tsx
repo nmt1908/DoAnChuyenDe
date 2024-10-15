@@ -7,6 +7,8 @@ import Icon from 'react-native-vector-icons/Ionicons';  // Thư viện icon
 import Feather from 'react-native-vector-icons/Feather';
 import CustomDrawerContent from './component/CustomDrawerContent';
 import LoginScreen from './screen/auth/LoginScreen';
+import RegisterScreen from './screen/auth/RegisterScreen';
+import ForgetPasswordScreen from './screen/auth/ForgetPasswordScreen';
 import SplashScreen from './screen/SplashScreen';
 import DetailProductScreen from './screen/DetailProductScreen';
 import AdminHomeScreen from './screen/admin/AdminHomeScreen';
@@ -101,7 +103,21 @@ export default function App() {
               headerShown: false,
             }}
           />
-
+          
+          <Drawer.Screen
+            name="RegisterScreen"
+            component={RegisterScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="ForgetPasswordScreen"
+            component={ForgetPasswordScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
 
         </Drawer.Navigator>
       </NavigationContainer>
