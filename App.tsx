@@ -12,6 +12,8 @@ import ForgetPasswordScreen from './screen/auth/ForgetPasswordScreen';
 import SplashScreen from './screen/SplashScreen';
 import DetailProductScreen from './screen/DetailProductScreen';
 import AdminHomeScreen from './screen/admin/AdminHomeScreen';
+import BrandManagement from './screen/admin/BrandManagement';
+import AddBrandScreen from './screen/admin/AddBrandScreen';
 import { UserProvider } from './UserContext';
 
 
@@ -92,6 +94,20 @@ export default function App() {
           <Drawer.Screen
             name="AdminHomeScreen"
             component={AdminHomeScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="BrandManagement"
+            component={BrandManagement}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="AddBrandScreen"
+            component={AddBrandScreen}
             options={{
               headerShown: false,
             }}
