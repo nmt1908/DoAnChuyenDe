@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import IconIon from 'react-native-vector-icons/Ionicons';
+import Carousel from 'react-native-reanimated-carousel';
+import IconFontAwesome from 'react-native-vector-icons/FontAwesome';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function DetailProductScreen({ route, navigation }) {
   const { productName, price, rating, images, description } = route.params;
   const [quantity, setQuantity] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0); // Thêm state để theo dõi index của slide hiện tại
 
-  // Function to handle quantity change
+  const { width } = Dimensions.get('window'); // Get screen width for the carousel
+
   const handleQuantityChange = (type) => {
     if (type === 'increase') {
       setQuantity(quantity + 1);
@@ -16,8 +21,30 @@ export default function DetailProductScreen({ route, navigation }) {
     }
   };
 
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating - fullStars >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    const stars = [];
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<IconFontAwesome key={`full-${i}`} name="star" size={20} color="#FFD700" />);
+    }
+
+    if (halfStar) {
+      stars.push(<IconFontAwesome key="half-star" name="star-half" size={20} color="#FFD700" />);
+    }
+
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<IconFontAwesome key={`empty-${i}`} name="star" size={20} color="#E0E0E0" />);
+    }
+
+    return stars;
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate('HomeTab')}>
@@ -26,19 +53,31 @@ export default function DetailProductScreen({ route, navigation }) {
         <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
       </View>
 
-      {/* Product Images */}
+      {/* Product Images using Carousel */}
       <View style={styles.imageSection}>
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          style={styles.imageContainer}
-        >
-          {images.map((image, index) => (
-            <Image key={index} source={image} style={styles.productImage} />
+        <Carousel
+          width={width}
+          height={300}
+          data={images}
+          renderItem={({ item }) => <Image source={{ uri: item }} style={styles.productImage} />}
+          autoPlay={true}
+          scrollAnimationDuration={1000}
+          loop={true}
+          onSnapToItem={(index) => setCurrentIndex(index)} // Cập nhật index hiện tại
+        />
+
+        {/* Custom Dots Indicator */}
+        <View style={styles.dotsContainer}>
+          {images.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                currentIndex === index ? styles.activeDot : styles.inactiveDot,
+              ]}
+            />
           ))}
-        </ScrollView>
-        <Text style={styles.swipeHint}>Vuốt để xem các ảnh khác</Text>
+        </View>
       </View>
 
       {/* Product Info */}
@@ -48,15 +87,13 @@ export default function DetailProductScreen({ route, navigation }) {
           <Text style={styles.price}>{price}</Text>
           <View style={styles.ratingContainer}>
             <Text style={styles.ratingText}>{rating}</Text>
-            <Icon name="star" size={20} color="#FFD700" />
+            <View style={styles.starContainer}>{renderStars(rating)}</View>
           </View>
         </View>
 
         <Text style={styles.specificationTitle}>Thông số kỹ thuật</Text>
         <Text style={styles.specificationText}>
-          {description.length > 200
-            ? `${description.slice(0, 200)}...`
-            : description}
+          {description.length > 300 ? `${description.slice(0, 300)}...` : description}
         </Text>
       </View>
 
@@ -70,11 +107,17 @@ export default function DetailProductScreen({ route, navigation }) {
         {/* Quantity and Add to Cart */}
         <View style={styles.cartContainer}>
           <View style={styles.quantityContainer}>
-            <TouchableOpacity onPress={() => handleQuantityChange('decrease')} style={styles.quantityButton}>
+            <TouchableOpacity
+              onPress={() => handleQuantityChange('decrease')}
+              style={styles.quantityButton}
+            >
               <Text style={styles.quantityButtonText}>-</Text>
             </TouchableOpacity>
             <Text style={styles.quantity}>{quantity}</Text>
-            <TouchableOpacity onPress={() => handleQuantityChange('increase')} style={styles.quantityButton}>
+            <TouchableOpacity
+              onPress={() => handleQuantityChange('increase')}
+              style={styles.quantityButton}
+            >
               <Text style={styles.quantityButtonText}>+</Text>
             </TouchableOpacity>
           </View>
@@ -83,7 +126,7 @@ export default function DetailProductScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -105,34 +148,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageSection: {
-    backgroundColor: '#f8f8f8',  // Đặt màu nền khác biệt cho phần ảnh
-    paddingBottom: 10,
-  },
-  imageContainer: {
-    height: 300,
+    paddingTop: 20,
     backgroundColor: '#fff',
+    height: 350,
   },
   productImage: {
     width: Dimensions.get('window').width,
     height: '100%',
     resizeMode: 'contain',
   },
-  swipeHint: {
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 14,
-    backgroundColor: '#F1694E',
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 30,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: '#FF4500',
+  },
+  inactiveDot: {
+    backgroundColor: 'gray',
   },
   productInfo: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    flexGrow: 1, // Đẩy phần còn lại lên trên
+    backgroundColor: '#fff',
+    marginHorizontal: 15,
+    marginTop:-25,
+    borderRadius: 15,
+    paddingTop: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingBottom: 70,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   productName: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#000',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   ratingRow: {
     flexDirection: 'row',
@@ -142,7 +203,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 24,
-    color: 'red',
+    color: '#FF0000',
     fontWeight: 'bold',
   },
   ratingContainer: {
@@ -155,8 +216,8 @@ const styles = StyleSheet.create({
   },
   specificationTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
     marginTop: 10,
+    color: '#000',
   },
   specificationText: {
     fontSize: 14,
@@ -173,6 +234,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+    
   },
   reviewButtonText: {
     color: '#FF4500',
@@ -212,5 +274,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  starContainer: {
+    flexDirection: 'row',
+    marginLeft: 5,
   },
 });

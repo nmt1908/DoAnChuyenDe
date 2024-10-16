@@ -1,158 +1,238 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, Image, StyleSheet, ScrollView, TouchableOpacity,
-  KeyboardAvoidingView, Platform
+  KeyboardAvoidingView, Platform, Dimensions, RefreshControl
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import Carousel from 'react-native-reanimated-carousel';
+import IconFontAwesome from 'react-native-vector-icons/FontAwesome';
+
 export default function AdminHomeScreen({ navigation }) {
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [bannerImages, setBannerImages] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedBrandId, setSelectedBrandId] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        // Fetch brands
+        const brandCollection = await firestore().collection('HangSX').get();
+        const brandList = brandCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setBrands(brandList);
+  
+        // Fetch categories
+        const categoryCollection = await firestore().collection('DanhMuc').get();
+        const categoryList = categoryCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setCategories(categoryList);
+  
+        // Fetch banner images
+        const fetchBannerImages = async () => {
+          const storageRef = storage().ref('imageBanner');
+          const result = await storageRef.listAll();
+          const urls = await Promise.all(result.items.map(item => item.getDownloadURL()));
+          setBannerImages(urls);
+        };
+        fetchBannerImages();
+  
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+  
+    fetchInitialData();
+  }, []);
+  const fetchProducts = async () => {
+    let query = firestore().collection('SanPham');
+
+    // Filter by selected category
+    if (selectedCategoryId) {
+      query = query.where('maDanhMuc', '==', selectedCategoryId);
+    }
+
+    // Filter by selected brand
+    if (selectedBrandId) {
+      query = query.where('idHang', '==', selectedBrandId);
+    }
+
+    const snapshot = await query.get();
+    const productList = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const productData = { id: doc.id, ...doc.data() };
+        
+        // Chỉ tải ảnh chính từ Firebase Storage
+        const storageRef = storage().ref(`imageProduct/${doc.id}`);
+        const result = await storageRef.listAll();
+        const imageUrls = await Promise.all(result.items.map(item => item.getDownloadURL()));
+        return {
+          ...productData,
+          imageUrl: imageUrls[0] || 'default-image-url',  // Chỉ tải ảnh chính
+        };
+      })
+    );
+
+    setProducts(productList);
+    setFilteredProducts(productList);  // Ban đầu không cần filter nữa vì đã dùng query
+  };
+  // Fetch products when selectedCategoryId or selectedBrandId changes
+  useEffect(() => {
+    
+
+    fetchProducts();
+  }, [selectedCategoryId, selectedBrandId]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+
+    setSelectedCategoryId(null);
+    setSelectedBrandId(null);
+
+    fetchProducts();
+
+    setRefreshing(false);
+  }, []);
+
+  const { width } = Dimensions.get('window');
+
+  const renderBannerItem = (item) => (
+    <View style={styles.carouselItem}>
+      <Image source={{ uri: item }} style={styles.bannerImage} />
+    </View>
+  );
+
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating - fullStars >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    const stars = [];
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<IconFontAwesome key={`full-${i}`} name="star" size={20} color="#FFD700" />);
+    }
+    if (halfStar) {
+      stars.push(<IconFontAwesome key="half-star" name="star-half" size={20} color="#FFD700" />);
+    }
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<IconFontAwesome key={`empty-${i}`} name="star" size={20} color="#E0E0E0" />);
+    }
+    return stars;
+  };
+
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Điều chỉnh cho iOS hoặc Android
-    >
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.container2}>
-          {/* Danh mục các hãng */}
+          {/* Categories */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>Danh mục sản phẩm</Text>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.categoryRow}>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/iphone16.jpg')} style={styles.categoryIcon} />
-                  <Text>Điện thoại</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/macpro.png')} style={styles.categoryIcon} />
-                  <Text>Laptop</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/tablet-ipad-pro.jpg')} style={styles.categoryIcon} />
-                  <Text>Tablet</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/pc-gaming.png')} style={styles.categoryIcon} />
-                  <Text>PC</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/logoapple.png')} style={styles.categoryIcon} />
-                  <Text>Apple</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/logoapple.png')} style={styles.categoryIcon} />
-                  <Text>Apple</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/logoapple.png')} style={styles.categoryIcon} />
-                  <Text>Apple</Text>
-                </TouchableOpacity>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[styles.categoryItem, selectedCategoryId === category.id && { borderColor: 'red' }]}
+                    onPress={() => setSelectedCategoryId(prevId => prevId === category.id ? null : category.id)}
+                  >
+                    <Image source={{ uri: category.urlAnh }} style={styles.categoryIcon} />
+                    <Text>{category.tenDanhMuc}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </ScrollView>
-
           </View>
+
+          {/* Brands */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>Danh mục thương hiệu</Text>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.categoryRow}>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/logoapple.png')} style={styles.categoryIcon} />
-                  <Text>Apple</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/samsunglogo.jpg')} style={styles.categoryIcon} />
-                  <Text>Samsung</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/oppologo.jpg')} style={styles.categoryIcon} />
-                  <Text>Oppo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/lenovologo.jpg')} style={styles.categoryIcon} />
-                  <Text>Lenovo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/acerlogo.jpg')} style={styles.categoryIcon} />
-                  <Text>Acer</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/logoapple.png')} style={styles.categoryIcon} />
-                  <Text>Apple</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.categoryItem}>
-                  <Image source={require('../../assets/images/logoapple.png')} style={styles.categoryIcon} />
-                  <Text>Apple</Text>
-                </TouchableOpacity>
+                {brands.map((brand) => (
+                  <TouchableOpacity
+                    key={brand.id}
+                    style={[styles.categoryItem, selectedBrandId === brand.id && { borderColor: 'red' }]}
+                    onPress={() => setSelectedBrandId(prevId => prevId === brand.id ? null : brand.id)}
+                  >
+                    <Image source={{ uri: brand.urlAnh }} style={styles.categoryIcon} />
+                    <Text>{brand.tenHang}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </ScrollView>
-
           </View>
-          {/* Banner quảng cáo */}
+
+          {/* Banner */}
           <View style={styles.bannerContainer}>
-            <Image source={require('../../assets/images/banner1.png')} style={styles.bannerImage} />
+            {bannerImages.length > 0 && (
+              <Carousel
+                width={width}
+                height={150}
+                data={bannerImages}
+                autoPlay
+                scrollAnimationDuration={1000}
+                renderItem={({ item }) => renderBannerItem(item)}
+              />
+            )}
           </View>
 
-          {/* Menu sản phẩm và nút lọc */}
+          {/* Product Header and Filter */}
           <View style={styles.productHeader}>
-            <Text style={styles.productTitle}>Menu</Text>
+            <Text style={styles.productTitle}>Menu Sản Phẩm</Text>
             <TouchableOpacity style={styles.filterButton}>
               <Icon name="filter" size={20} color="#000" />
               <Text style={styles.filterText}>Lọc</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Danh sách sản phẩm */}
+          {/* Product List */}
           <View style={styles.productContainer}>
-            {/* Dòng 1 */}
-            <TouchableOpacity
-              style={styles.productItem}
-              onPress={() => navigation.navigate('DetailProductScreen', {
-                productName: 'Iphone 16 Pro Max',
-                price: '41.000.000đ',
-                rating: '5.0',
-                description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum'
-                ,
-                images: [require('../../assets/images/iphone16.jpg'), require('../../assets/images/iphone16.jpg'), require('../../assets/images/iphone16.jpg')]
-              })}>
-              <Image source={require('../../assets/images/iphone16.jpg')} style={styles.productImage} />
-              <Text style={styles.productName}>Iphone 16 Pro Max</Text>
-              <Text style={styles.productPrice}>41.000.000đ</Text>
-              <Text style={styles.productRating}>★★★★★ (5.0)</Text>
-              <TouchableOpacity style={styles.addToCartButton}>
-                <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <TouchableOpacity
+                  key={product.id}
+                  style={styles.productItem}
+                  onPress={async () => {
+                    // Tải toàn bộ ảnh khi người dùng nhấn vào chi tiết sản phẩm
+                    const storageRef = storage().ref(`imageProduct/${product.id}`);
+                    const result = await storageRef.listAll();
+                    const allImageUrls = await Promise.all(result.items.map(item => item.getDownloadURL()));
 
-            <TouchableOpacity style={styles.productItem}>
-              <Image source={require('../../assets/images/iphone14.jpg')} style={styles.productImage} />
-              <Text style={styles.productName}>Iphone 14 Pro Max</Text>
-              <Text style={styles.productPrice}>27.999.999đ</Text>
-              <Text style={styles.productRating}>★★★★★ (5.0)</Text>
-              <TouchableOpacity style={styles.addToCartButton}>
-                <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-
-            {/* Dòng 2 */}
-            <TouchableOpacity style={styles.productItem}>
-              <Image source={require('../../assets/images/iphone16.jpg')} style={styles.productImage} />
-              <Text style={styles.productName}>Iphone 16 Pro Max</Text>
-              <Text style={styles.productPrice}>41.000.000đ</Text>
-              <Text style={styles.productRating}>★★★★★ (5.0)</Text>
-              <TouchableOpacity style={styles.addToCartButton}>
-                <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.productItem}>
-              <Image source={require('../../assets/images/iphone14.jpg')} style={styles.productImage} />
-              <Text style={styles.productName}>Iphone 14 Pro Max</Text>
-              <Text style={styles.productPrice}>27.999.999đ</Text>
-              <Text style={styles.productRating}>★★★★★ (5.0)</Text>
-              <TouchableOpacity style={styles.addToCartButton}>
-                <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
+                    navigation.navigate('DetailProductScreen', {
+                      productName: product.tenSP,
+                      price: `${product.giaBan.toLocaleString()}đ`,
+                      rating: product.danhGia,
+                      description: product.moTa,
+                      images: allImageUrls
+                    });
+                  }}
+                >
+                  <Image source={{ uri: product.imageUrl }} style={styles.productImage} />
+                  <Text style={styles.productName}>{product.tenSP}</Text>
+                  <Text style={styles.productPrice}>{product.giaBan.toLocaleString()}đ</Text>
+                  <View style={styles.ratingContainer}>
+                    <Text>{product.danhGia}</Text>
+                    <View style={styles.starContainer}>
+                      {renderStars(product.danhGia)}
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.addToCartButton}>
+                    <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.noResultsText}>Không có kết quả cho sản phẩm bạn tìm kiếm...</Text>
+            )}
           </View>
-
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -162,117 +242,59 @@ export default function AdminHomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff' 
   },
   container2: {
-    marginBottom: 85,
+    marginBottom: 85
   },
   categoryContainer: {
-    padding: 10,
+    padding: 10
   },
   categoryTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 10
   },
   categoryRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-
+    justifyContent: 'space-around'
   },
   categoryItem: {
     alignItems: 'center',
     marginRight: 15,
     elevation: 5,
-    backgroundColor: '#fff', // Màu nền của sản phẩm
-    borderRadius: 10, // Bo góc khung sản phẩm
-    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10
   },
   categoryIcon: {
     width: 60,
     height: 60,
-    marginBottom: 5,
+    marginBottom: 5
   },
   bannerContainer: {
     marginVertical: 10,
     alignItems: 'center',
+    backgroundColor: '#F6F5F8'
   },
   bannerImage: {
     width: '100%',
     height: 150,
-    resizeMode: 'cover',
+    resizeMode: 'contain'
   },
-  productHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
-  },
-  productTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  productContainer: {
-    flexDirection: 'row',  // Đặt chiều ngang cho dòng
-    flexWrap: 'wrap',  // Tự động xuống dòng nếu hết chỗ
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-  },
-  productRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  productItem: {
-    width: '48%',  // Chiều rộng của mỗi sản phẩm
-    alignItems: 'center',
-    backgroundColor: '#fff', // Màu nền của sản phẩm
-    borderRadius: 10, // Bo góc khung sản phẩm
-    padding: 10, // Padding cho khung sản phẩm
-    marginBottom: 10,
-    // Đổ bóng cho Android
-    elevation: 5,
-  },
-  productImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 10,
-    resizeMode: 'contain',  // Giữ tỉ lệ ảnh đúng
-  },
-  productName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  productPrice: {
-    fontSize: 16,
-    color: 'red',
-    marginBottom: 5,
-  },
-  productRating: {
-    fontSize: 14,
-    color: '#ffcc00',
-    marginBottom: 10,
-  },
-  addToCartButton: {
-    backgroundColor: '#ff4500',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  filterButton: {
-    flexDirection: 'row',  // Đặt hướng nằm ngang cho các thành phần bên trong
-    alignItems: 'center',  // Canh giữa theo trục dọc (vertical)
-  },
-  filterText: {
-    marginLeft: 5,  // Thêm khoảng cách giữa icon và text
-    fontSize: 16,
-    color: '#000',
-    fontWeight: 'bold',
-  },
+  carouselItem: { justifyContent: 'center', alignItems: 'center' },
+  productHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 20 },
+  productTitle: { fontSize: 18, fontWeight: 'bold' },
+  productContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 20 },
+  productItem: { width: '48%', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 10, marginBottom: 10, elevation: 5 },
+  productImage: { width: 120, height: 120, marginBottom: 10, resizeMode: 'contain' },
+  productName: { fontSize: 14, fontWeight: 'bold', marginBottom: 5, textAlign: 'center' },
+  productPrice: { fontSize: 16, color: 'red', marginBottom: 5 },
+  ratingContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  starContainer: { flexDirection: 'row', marginLeft: 5 },
+  addToCartButton: { backgroundColor: '#ff4500', paddingVertical: 8, paddingHorizontal: 10, borderRadius: 5 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 12 },
+  filterButton: { flexDirection: 'row', alignItems: 'center' },
+  filterText: { marginLeft: 5, fontSize: 16, color: '#000', fontWeight: 'bold' },
+  noResultsText: { textAlign: 'center', marginTop: 20, fontSize: 16, color: 'gray' }
 });
