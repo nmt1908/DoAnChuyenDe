@@ -16,7 +16,7 @@ import SplashScreen from './screen/SplashScreen';
 import ForgetPasswordScreen from './screen/auth/ForgetPasswordScreen';
 import DetailProductScreen from './screen/DetailProductScreen';
 import AdminHomeScreen from './screen/admin/AdminHomeScreen';
-import { UserProvider } from '../DoAnChuyenDeDiDong/UserContext';
+import { UserProvider } from './UserContext';
 
 
 const Drawer = createDrawerNavigator();

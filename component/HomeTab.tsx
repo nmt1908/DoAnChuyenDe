@@ -42,10 +42,10 @@ const HomeTab = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => {
           const iconName = {
-            'Home': 'home',
-            'Notifications': 'bell',
-            'Cart': 'shopping-bag',
-            'Profile': 'user'
+            'Trang chủ': 'home',
+            'Thông báo': 'bell',
+            'Giỏ hàng': 'shopping-bag',
+            'Tài khoản': 'user'
           }[route.name];
 
           return (
@@ -80,20 +80,20 @@ const HomeTab = () => {
       })}
     >
       <Tab.Screen
-        name="Home"
+        name="Trang chủ"
         component={AdminHomeScreen}
       />
       
       <Tab.Screen
-        name="Cart"
+        name="Giỏ hàng"
         component={CartScreen}
       />
       <Tab.Screen
-        name="Notifications"
+        name="Thông báo"
         component={NotificationScreen}
       />
       <Tab.Screen
-        name="Profile"
+        name="Tài khoản"
         component={AccountScreen}
       />
     </Tab.Navigator>
