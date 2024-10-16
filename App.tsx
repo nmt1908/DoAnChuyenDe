@@ -14,7 +14,10 @@ import DetailProductScreen from './screen/DetailProductScreen';
 import AdminHomeScreen from './screen/admin/AdminHomeScreen';
 import BrandManagement from './screen/admin/BrandManagement';
 import AddBrandScreen from './screen/admin/AddBrandScreen';
+import CategoryManagement from './screen/admin/CategoryManagement';
+
 import { UserProvider } from './UserContext';
+import AddCategoryScreen from './screen/admin/AddCategoryScreen';
 
 
 const Drawer = createDrawerNavigator();
@@ -134,7 +137,20 @@ export default function App() {
               headerShown: false,
             }}
           />
-
+          <Drawer.Screen
+            name="CategoryManagement"
+            component={CategoryManagement}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Drawer.Screen
+            name="AddCategoryScreen"
+            component={AddCategoryScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
         </Drawer.Navigator>
       </NavigationContainer>
     </UserProvider>
