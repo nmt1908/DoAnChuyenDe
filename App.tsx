@@ -6,18 +6,17 @@ import HomeTab from './component/HomeTab';  // Import HomeTab vừa tạo
 import Icon from 'react-native-vector-icons/Ionicons';  // Thư viện icon
 import Feather from 'react-native-vector-icons/Feather';
 import CustomDrawerContent from './component/CustomDrawerContent';
-import LoginScreen from './screen/auth/LoginScreen';
-import RegisterScreen from './screen/auth/RegisterScreen';
-import ForgetPasswordScreen from './screen/auth/ForgetPasswordScreen';
-import SplashScreen from './screen/SplashScreen';
-import DetailProductScreen from './screen/DetailProductScreen';
-import AdminHomeScreen from './screen/admin/AdminHomeScreen';
+import CategoryManagement from './screen/admin/CategoryManagement';
+import AddCategoryScreen from './screen/admin/AddCategoryScreen';
 import BrandManagement from './screen/admin/BrandManagement';
 import AddBrandScreen from './screen/admin/AddBrandScreen';
-import CategoryManagement from './screen/admin/CategoryManagement';
-
-import { UserProvider } from './UserContext';
-import AddCategoryScreen from './screen/admin/AddCategoryScreen';
+import LoginScreen from './screen/auth/LoginScreen';
+import RegisterScreen from './screen/auth/RegisterScreen';
+import SplashScreen from './screen/SplashScreen';
+import ForgetPasswordScreen from './screen/auth/ForgetPasswordScreen';
+import DetailProductScreen from './screen/DetailProductScreen';
+import AdminHomeScreen from './screen/admin/AdminHomeScreen';
+import { UserProvider } from '../DoAnChuyenDeDiDong/UserContext';
 
 
 const Drawer = createDrawerNavigator();
@@ -62,6 +61,7 @@ const CustomHeader = ({ navigation }) => {
 
 // Tạo Drawer Navigator kết hợp với Bottom Tab
 export default function App() {
+  console.disableYellowBox = true;
   return (
     <UserProvider>
       <NavigationContainer>
@@ -81,26 +81,25 @@ export default function App() {
             component={HomeTab}
             options={{
               header: ({ navigation }) => <CustomHeader navigation={navigation} />,
-              headerShown: true,  // Hiển thị header tùy chỉnh
+              headerShown: true,  
             }}
           />
 
-          
-
           <Drawer.Screen
-            name="LoginScreen"
-            component={LoginScreen}
+            name="CategoryManagement"
+            component={CategoryManagement}
             options={{
               headerShown: false,
             }}
           />
           <Drawer.Screen
-            name="AdminHomeScreen"
-            component={AdminHomeScreen}
+            name="AddCategoryScreen"
+            component={AddCategoryScreen}
             options={{
-              headerShown: false,
+              headerShown: false,  // Hide the default header
             }}
           />
+
           <Drawer.Screen
             name="BrandManagement"
             component={BrandManagement}
@@ -115,14 +114,14 @@ export default function App() {
               headerShown: false,
             }}
           />
+
           <Drawer.Screen
-            name="DetailProductScreen"
-            component={DetailProductScreen}
+            name="LoginScreen"
+            component={LoginScreen}
             options={{
               headerShown: false,
             }}
           />
-          
           <Drawer.Screen
             name="RegisterScreen"
             component={RegisterScreen}
@@ -138,19 +137,21 @@ export default function App() {
             }}
           />
           <Drawer.Screen
-            name="CategoryManagement"
-            component={CategoryManagement}
+            name="AdminHomeScreen"
+            component={AdminHomeScreen}
             options={{
               headerShown: false,
             }}
           />
           <Drawer.Screen
-            name="AddCategoryScreen"
-            component={AddCategoryScreen}
+            name="DetailProductScreen"
+            component={DetailProductScreen}
             options={{
               headerShown: false,
             }}
           />
+
+
         </Drawer.Navigator>
       </NavigationContainer>
     </UserProvider>
