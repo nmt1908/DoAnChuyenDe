@@ -11,6 +11,7 @@ import {
     Platform,
     ActivityIndicator
 } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import CustomAlert from '../../component/CustomAlert'; // Import CustomAlert để hiển thị thông báo lỗi/thành công
 
@@ -29,25 +30,50 @@ export default function ForgetPasswordScreen({ navigation }) {
         setAlertVisible(false);
     };
 
+    const checkEmailExistsInFirestore = async (email) => {
+        try {
+            // Truy vấn Firestore để kiểm tra email có tồn tại hay không
+            const querySnapshot = await firestore()
+                .collection('NguoiDung') // Tên collection trong Firestore
+                .where('email', '==', email) // Kiểm tra với trường email
+                .get();
+
+            return !querySnapshot.empty; // Trả về true nếu có kết quả, ngược lại trả về false
+        } catch (error) {
+            console.error('Lỗi khi kiểm tra email trong Firestore:', error);
+            return false;
+        }
+    };
+
     const handlePasswordReset = async () => {
         const trimmedEmail = email.trim(); // Xóa khoảng trắng
+        const emailRegex = /^[a-zA-Z0-9._%+-]{6,30}@gmail\.com$/;
+
         if (!trimmedEmail) {
-            showAlert('Lỗi', 'Vui lòng nhập email.');
+            showAlert('Lỗi', 'Vui lòng nhập email. Email không được bỏ trống');
             return;
         }
-    
+
+        if (!emailRegex.test(trimmedEmail)) {
+            showAlert('Lỗi', 'Email không hợp lệ! Email phải có ít nhất 6 và tối đa 30 ký tự.');
+            return;
+        }
+
         setLoading(true);
         try {
-            // Gửi email đặt lại mật khẩu
-            await auth().sendPasswordResetEmail(trimmedEmail);
-            showAlert('Thành công', 'Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.');
+            // Kiểm tra email trong Firestore
+            const emailExists = await checkEmailExistsInFirestore(trimmedEmail);
+
+            if (!emailExists) {
+                showAlert('Lỗi', 'Email không tồn tại trong hệ thống Firestore.');
+            } else {
+                // Gửi email đặt lại mật khẩu qua Firebase Authentication
+                await auth().sendPasswordResetEmail(trimmedEmail);
+                showAlert('Thành công', 'Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.');
+            }
         } catch (error) {
             console.error('Lỗi gửi email đặt lại mật khẩu:', error);
-    
-            // Nếu email không tồn tại, Firebase sẽ trả về lỗi auth/user-not-found
-            if (error.code === 'auth/user-not-found') {
-                showAlert('Lỗi', 'Email không tồn tại trong hệ thống. Vui lòng kiểm tra lại email.');
-            } else if (error.code === 'auth/invalid-email') {
+            if (error.code === 'auth/invalid-email') {
                 showAlert('Lỗi', 'Địa chỉ email không hợp lệ.');
             } else {
                 showAlert('Lỗi', 'Đã có lỗi xảy ra. Vui lòng thử lại.');
@@ -56,9 +82,7 @@ export default function ForgetPasswordScreen({ navigation }) {
             setLoading(false);
         }
     };
-    
 
-    
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
