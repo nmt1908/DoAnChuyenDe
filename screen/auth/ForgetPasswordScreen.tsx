@@ -20,35 +20,35 @@ export default function ForgetPasswordScreen({ navigation }) {
     const [isAlertVisible, setAlertVisible] = useState(false); // Trạng thái hiển thị alert
     const [alertContent, setAlertContent] = useState({ title: '', message: '' }); // Nội dung của alert
 
-    // Hiển thị alert
     const showAlert = (title, message) => {
         setAlertContent({ title, message });
         setAlertVisible(true);
     };
 
-    // Ẩn alert
     const hideAlert = () => {
         setAlertVisible(false);
     };
 
-    // Xử lý yêu cầu đặt lại mật khẩu
     const handlePasswordReset = async () => {
-        if (!email) {
+        const trimmedEmail = email.trim(); // Xóa khoảng trắng
+        if (!trimmedEmail) {
             showAlert('Lỗi', 'Vui lòng nhập email.');
             return;
         }
-
+    
         setLoading(true);
         try {
-            // Gửi email đặt lại mật khẩu qua Firebase
-            await auth().sendPasswordResetEmail(email);
+            // Gửi email đặt lại mật khẩu
+            await auth().sendPasswordResetEmail(trimmedEmail);
             showAlert('Thành công', 'Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.');
         } catch (error) {
             console.error('Lỗi gửi email đặt lại mật khẩu:', error);
-            if (error.code === 'auth/invalid-email') {
+    
+            // Nếu email không tồn tại, Firebase sẽ trả về lỗi auth/user-not-found
+            if (error.code === 'auth/user-not-found') {
+                showAlert('Lỗi', 'Email không tồn tại trong hệ thống. Vui lòng kiểm tra lại email.');
+            } else if (error.code === 'auth/invalid-email') {
                 showAlert('Lỗi', 'Địa chỉ email không hợp lệ.');
-            } else if (error.code === 'auth/user-not-found') {
-                showAlert('Lỗi', 'Không tìm thấy tài khoản với email này.');
             } else {
                 showAlert('Lỗi', 'Đã có lỗi xảy ra. Vui lòng thử lại.');
             }
@@ -56,7 +56,9 @@ export default function ForgetPasswordScreen({ navigation }) {
             setLoading(false);
         }
     };
+    
 
+    
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
