@@ -7,12 +7,13 @@ import {
     Image,
     StyleSheet,
     ActivityIndicator,
-    LogBox, ScrollView,
+    ScrollView,
     KeyboardAvoidingView, Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import Icon from 'react-native-vector-icons/Feather'; // Import Icon Feather
 import { UserContext } from '../../UserContext'; // Import UserContext
 import CustomAlert from '../../component/CustomAlert'; // Import CustomAlert
 
@@ -23,6 +24,7 @@ export default function LoginScreen({ navigation }) {
     const [loading, setLoading] = useState(true); // Biến để theo dõi trạng thái load
     const [isAlertVisible, setAlertVisible] = useState(false); // Trạng thái hiển thị alert
     const [alertContent, setAlertContent] = useState({ title: '', message: '' }); // Nội dung của alert
+    const [showPassword, setShowPassword] = useState(false); // Trạng thái hiển thị/ẩn mật khẩu
 
     // Hiển thị alert
     const showAlert = (title, message) => {
@@ -50,10 +52,14 @@ export default function LoginScreen({ navigation }) {
 
         checkLoginStatus();
     }, []);
-    LogBox.ignoreLogs(['[auth/invalid-credential]', '[auth/invalid-email]', '[auth/too-many-requests]']);
+
     const handleLogin = async () => {
         setLoading(true);
         try {
+            if (!loginCredential || !password) {
+                showAlert('Lỗi', 'Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
             // Đăng nhập bằng Firebase Authentication
             const userCredential = await auth().signInWithEmailAndPassword(loginCredential, password);
             console.log('User Credential:', userCredential);
@@ -135,7 +141,9 @@ export default function LoginScreen({ navigation }) {
     if (loading) {
         // Hiển thị khi đang kiểm tra trạng thái đăng nhập
         return (
-            <View style={styles.container}>
+            <View style={styles.loadingContainer}>
+                {/* Logo hiển thị phía trên ActivityIndicator */}
+                <Image source={require('../../assets/images/logo.png')} style={styles.loadingLogo} />
                 <ActivityIndicator size="large" color="#FF4500" />
             </View>
         );
@@ -158,14 +166,21 @@ export default function LoginScreen({ navigation }) {
                     autoCapitalize="none"
                 />
 
-                {/* Password Input */}
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mật khẩu"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                />
+                {/* Password Input với icon mắt */}
+                <View style={styles.passwordInputContainer}>
+                    <TextInput
+                        style={styles.inputPassword}
+                        placeholder="Mật khẩu"
+                        secureTextEntry={!showPassword} // Điều khiển hiển thị/ẩn mật khẩu
+                        value={password}
+                        onChangeText={setPassword}
+                    />
+                    {password.length > 0 && (
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color="#FF4500" />
+                        </TouchableOpacity>
+                    )}
+                </View>
 
                 {/* Forgot Password Link */}
                 <TouchableOpacity
@@ -199,7 +214,6 @@ export default function LoginScreen({ navigation }) {
         </KeyboardAvoidingView>
     );
 }
-
 const styles = StyleSheet.create({
     contentContainer: {
         flexGrow: 1,
@@ -221,6 +235,20 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         paddingHorizontal: 20,
         marginBottom: 10,
+        fontSize: 16,
+    },
+    passwordInputContainer: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        marginBottom: 10,
+    },
+    inputPassword: {
+        flex: 1,
+        height: 50,
         fontSize: 16,
     },
     forgotPassword: {
@@ -254,5 +282,17 @@ const styles = StyleSheet.create({
     registerLink: {
         color: '#FF4500',
         fontWeight: 'bold',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    loadingLogo: {
+        width: 250,
+        height: 250,
+        marginBottom: 20,
+        resizeMode: 'contain',
     },
 });
