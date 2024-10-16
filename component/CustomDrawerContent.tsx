@@ -61,12 +61,15 @@ const CustomDrawerContent = (props) => {
       }
     };
   }, [setUserData]);
-
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userData');
-      setUserData(null); // Cập nhật UserContext về null sau khi đăng xuất
+      // Xóa tất cả dữ liệu liên quan đến người dùng từ AsyncStorage
+      await AsyncStorage.clear(); // Xóa tất cả dữ liệu từ AsyncStorage
+
+      // Cập nhật UserContext về null sau khi đăng xuất
+      setUserData(null); // Xóa dữ liệu người dùng trong Context
+
+      // Điều hướng người dùng về trang đăng nhập sau khi xóa thành công
       props.navigation.reset({
         index: 0,
         routes: [{ name: 'LoginScreen' }],
@@ -137,10 +140,6 @@ const CustomDrawerContent = (props) => {
 
         {userData && userData.vaiTro === 'VaiTro_ID2' ? (
           <>
-            <TouchableOpacity style={styles.menuItem} onPress={() => props.navigation.navigate('AccountInfo')}>
-              <Icon name="person-outline" size={20} color="#774C60" />
-              <Text style={styles.menuText}>Thông tin tài khoản</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} >
               <Icon name="bar-chart-outline" size={20} color="#774C60" />
               <Text style={styles.menuText}>Đơn hàng của tôi</Text>
@@ -148,6 +147,19 @@ const CustomDrawerContent = (props) => {
           </>
         ) : null}
 
+        {userData && userData.vaiTro === 'VaiTro_ID4' ? (
+          <>
+
+            <TouchableOpacity style={styles.menuItem} >
+              <Icon name="bar-chart-outline" size={20} color="#774C60" />
+              <Text style={styles.menuText}>Quản lý đơn hàng</Text>
+            </TouchableOpacity>
+          </>
+        ) : null}
+        <TouchableOpacity style={styles.menuItem} onPress={() => props.navigation.navigate('Tài khoản')}>
+          <Icon name="person-outline" size={20} color="#774C60" />
+          <Text style={styles.menuText}>Thông tin tài khoản</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={showLogoutModal}>
           <Icon name="log-out-outline" size={20} color="#774C60" />
           <Text style={styles.menuText}>Đăng xuất</Text>
