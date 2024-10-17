@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   View, Text, Image, StyleSheet, ScrollView, TouchableOpacity,
   KeyboardAvoidingView, Platform, Dimensions, RefreshControl
@@ -8,6 +8,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import Carousel from 'react-native-reanimated-carousel';
 import IconFontAwesome from 'react-native-vector-icons/FontAwesome';
+import { SearchContext } from '../../SearchContext';  // Import SearchContext
 
 export default function AdminHomeScreen({ navigation }) {
   const [brands, setBrands] = useState([]);
@@ -19,7 +20,9 @@ export default function AdminHomeScreen({ navigation }) {
   const [selectedBrandId, setSelectedBrandId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch data on mount
+  const { searchText } = useContext(SearchContext); // Lấy searchText từ SearchContext
+
+  // Fetch dữ liệu ban đầu
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -27,12 +30,12 @@ export default function AdminHomeScreen({ navigation }) {
         const brandCollection = await firestore().collection('HangSX').get();
         const brandList = brandCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setBrands(brandList);
-  
+
         // Fetch categories
         const categoryCollection = await firestore().collection('DanhMuc').get();
         const categoryList = categoryCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setCategories(categoryList);
-  
+
         // Fetch banner images
         const fetchBannerImages = async () => {
           const storageRef = storage().ref('imageBanner');
@@ -41,23 +44,42 @@ export default function AdminHomeScreen({ navigation }) {
           setBannerImages(urls);
         };
         fetchBannerImages();
-  
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchInitialData();
   }, []);
+
+  // Fetch sản phẩm khi thay đổi category hoặc brand
+  useEffect(() => {
+    fetchProducts();
+  }, [selectedCategoryId, selectedBrandId]);
+
+  // Lọc sản phẩm theo từ khóa tìm kiếm
+  useEffect(() => {
+    if (searchText) {
+      const lowerCaseSearchText = searchText.toLowerCase();
+      const filtered = products.filter(product =>
+        product.tenSP.toLowerCase().includes(lowerCaseSearchText)
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products); // Hiển thị tất cả sản phẩm nếu không có từ khóa tìm kiếm
+    }
+  }, [searchText, products]);
+
   const fetchProducts = async () => {
     let query = firestore().collection('SanPham');
 
-    // Filter by selected category
+    // Lọc theo danh mục
     if (selectedCategoryId) {
       query = query.where('maDanhMuc', '==', selectedCategoryId);
     }
 
-    // Filter by selected brand
+    // Lọc theo thương hiệu
     if (selectedBrandId) {
       query = query.where('idHang', '==', selectedBrandId);
     }
@@ -66,7 +88,7 @@ export default function AdminHomeScreen({ navigation }) {
     const productList = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const productData = { id: doc.id, ...doc.data() };
-        
+
         // Chỉ tải ảnh chính từ Firebase Storage
         const storageRef = storage().ref(`imageProduct/${doc.id}`);
         const result = await storageRef.listAll();
@@ -79,23 +101,14 @@ export default function AdminHomeScreen({ navigation }) {
     );
 
     setProducts(productList);
-    setFilteredProducts(productList);  // Ban đầu không cần filter nữa vì đã dùng query
+    setFilteredProducts(productList);  // Ban đầu không cần filter thêm vì đã dùng query
   };
-  // Fetch products when selectedCategoryId or selectedBrandId changes
-  useEffect(() => {
-    
-
-    fetchProducts();
-  }, [selectedCategoryId, selectedBrandId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-
     setSelectedCategoryId(null);
     setSelectedBrandId(null);
-
     fetchProducts();
-
     setRefreshing(false);
   }, []);
 
@@ -132,7 +145,7 @@ export default function AdminHomeScreen({ navigation }) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.container2}>
-          {/* Categories */}
+          {/* Danh mục sản phẩm */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>Danh mục sản phẩm</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -151,7 +164,7 @@ export default function AdminHomeScreen({ navigation }) {
             </ScrollView>
           </View>
 
-          {/* Brands */}
+          {/* Danh mục thương hiệu */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>Danh mục thương hiệu</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -193,7 +206,7 @@ export default function AdminHomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Product List */}
+          {/* Danh sách sản phẩm */}
           <View style={styles.productContainer}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (

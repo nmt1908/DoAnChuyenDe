@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -17,14 +17,14 @@ import ForgetPasswordScreen from './screen/auth/ForgetPasswordScreen';
 import DetailProductScreen from './screen/DetailProductScreen';
 import AdminHomeScreen from './screen/admin/AdminHomeScreen';
 import { UserProvider } from './UserContext';
-
+import { SearchProvider,SearchContext } from './SearchContext';
 
 const Drawer = createDrawerNavigator();
 
 // Tạo Header Tùy Chỉnh
 const CustomHeader = ({ navigation }) => {
-  
-  const [searchText, setSearchText] = useState('');
+
+  const { searchText, setSearchText } = useContext(SearchContext);
   return (
     <View style={styles.headerContainer}>
       {/* Nút Menu (Drawer) */}
@@ -39,8 +39,8 @@ const CustomHeader = ({ navigation }) => {
           placeholder="Tìm sản phẩm"
           style={styles.searchInput}
           placeholderTextColor="#000"
-          value={searchText} // Giá trị từ state
-          onChangeText={(text) => setSearchText(text)} // Cập nhật state khi nhập liệu
+          value={searchText}  // Lấy giá trị từ context
+          onChangeText={(text) => setSearchText(text)}  // Cập nhật context
         />
         {searchText ? (
           <TouchableOpacity onPress={() => setSearchText('')} style={styles.clearIconContainer}>
@@ -64,96 +64,98 @@ export default function App() {
   console.disableYellowBox = true;
   return (
     <UserProvider>
-      <NavigationContainer>
-        <Drawer.Navigator
-          drawerContent={(props) => <CustomDrawerContent {...props} />}  // Sử dụng nội dung Drawer tùy chỉnh
-        >
-          {/* Đăng ký màn hình chính */}
-          <Drawer.Screen
-            name="SplashScreen"
-            component={SplashScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="HomeTab"
-            component={HomeTab}
-            options={{
-              header: ({ navigation }) => <CustomHeader navigation={navigation} />,
-              headerShown: true,  
-            }}
-          />
+      <SearchProvider>
+        <NavigationContainer>
+          <Drawer.Navigator
+            drawerContent={(props) => <CustomDrawerContent {...props} />}  // Sử dụng nội dung Drawer tùy chỉnh
+          >
+            {/* Đăng ký màn hình chính */}
+            <Drawer.Screen
+              name="SplashScreen"
+              component={SplashScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="HomeTab"
+              component={HomeTab}
+              options={{
+                header: ({ navigation }) => <CustomHeader navigation={navigation} />,
+                headerShown: true,
+              }}
+            />
 
-          <Drawer.Screen
-            name="CategoryManagement"
-            component={CategoryManagement}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="AddCategoryScreen"
-            component={AddCategoryScreen}
-            options={{
-              headerShown: false,  // Hide the default header
-            }}
-          />
+            <Drawer.Screen
+              name="CategoryManagement"
+              component={CategoryManagement}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="AddCategoryScreen"
+              component={AddCategoryScreen}
+              options={{
+                headerShown: false,  // Hide the default header
+              }}
+            />
 
-          <Drawer.Screen
-            name="BrandManagement"
-            component={BrandManagement}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="AddBrandScreen"
-            component={AddBrandScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Drawer.Screen
+              name="BrandManagement"
+              component={BrandManagement}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="AddBrandScreen"
+              component={AddBrandScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Drawer.Screen
-            name="LoginScreen"
-            component={LoginScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="RegisterScreen"
-            component={RegisterScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="ForgetPasswordScreen"
-            component={ForgetPasswordScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="AdminHomeScreen"
-            component={AdminHomeScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Drawer.Screen
-            name="DetailProductScreen"
-            component={DetailProductScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Drawer.Screen
+              name="LoginScreen"
+              component={LoginScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="RegisterScreen"
+              component={RegisterScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="ForgetPasswordScreen"
+              component={ForgetPasswordScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="AdminHomeScreen"
+              component={AdminHomeScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Drawer.Screen
+              name="DetailProductScreen"
+              component={DetailProductScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
 
 
-        </Drawer.Navigator>
-      </NavigationContainer>
+          </Drawer.Navigator>
+        </NavigationContainer>
+      </SearchProvider>
     </UserProvider>
 
   );
