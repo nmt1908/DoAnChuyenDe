@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, Modal, TextInput ,TouchableWithoutFeedback} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Feather'; // Icon Feather (mắt)
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Icon đồng xu
@@ -30,6 +30,19 @@ export default function AccountScreen({ navigation }) {
   const [editedPhone, setEditedPhone] = useState(userData?.sdt || ''); // Số điện thoại
   const [editedDOB, setEditedDOB] = useState(userData?.ngaySinh || ''); // Ngày sinh
   const [editedGender, setEditedGender] = useState(userData?.gioiTinh || '');
+  const [isImageModalVisible, setImageModalVisible] = useState(false);
+  const openImageModal = () => {
+    if (userData && userData.urlAnh) {
+        setImageModalVisible(true); // Chỉ mở modal nếu userData và urlAnh đã sẵn sàng
+    } else {
+        console.log('Dữ liệu người dùng hoặc URL ảnh chưa sẵn sàng.');
+    }
+};
+
+  const closeImageModal = () => {
+    setImageModalVisible(false);
+  };
+
 
   const openEditModal = () => {
     setEditModalVisible(true);
@@ -137,7 +150,12 @@ export default function AccountScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <ImageBackground source={require('../assets/images/wallpaper.jpg')} style={styles.wallpaper}>
         <View style={styles.header}>
-          <Image source={userData?.urlAnh ? { uri: userData.urlAnh } : require('../assets/images/defaultuser.jpg')} style={styles.avatar} />
+          <TouchableOpacity onPress={openImageModal}>
+            <Image
+              source={userData?.urlAnh ? { uri: userData.urlAnh } : require('../assets/images/defaultuser.jpg')}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.cameraIconBackground}>
             <Icon style={styles.cameraIcon} name="camera" size={20} color="#fff" />
           </TouchableOpacity>
@@ -148,7 +166,7 @@ export default function AccountScreen({ navigation }) {
         {userData ? (
           <>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Họ Và Tên</Text>
+              <Text style={styles.infoLabel}>Họ Và Tên </Text>
               <Text style={styles.infoValue}>{userData.tenNguoiDung}</Text>
             </View>
             <View style={styles.infoRow}>
@@ -182,9 +200,9 @@ export default function AccountScreen({ navigation }) {
               </View>
             </View>
             <TouchableOpacity style={styles.editIcon} onPress={openEditModal}>
-             
+
               <Icon name="edit" size={30} color="#FF4500" />
-              
+
             </TouchableOpacity>
           </>
         ) : (
@@ -324,7 +342,7 @@ export default function AccountScreen({ navigation }) {
               value={editedName}
               onChangeText={setEditedName}
             />
-             <TextInput
+            <TextInput
               style={styles.input2}
               placeholder="Ngày Sinh"
               value={editedDOB}
@@ -375,6 +393,28 @@ export default function AccountScreen({ navigation }) {
         message={alertContent.message}
         onClose={hideAlert}
       />
+      <Modal
+    visible={isImageModalVisible}
+    transparent={true}
+    animationType="fade"
+    onRequestClose={closeImageModal}
+>
+    <TouchableWithoutFeedback onPress={closeImageModal}>
+        <View style={styles.imageModalContainer}>
+            {userData?.urlAnh ? (
+                <Image
+                    source={{ uri: userData.urlAnh }}
+                    style={styles.fullscreenImage}
+                    resizeMode="contain"
+                    onError={(error) => console.log('Lỗi khi tải ảnh:', error.nativeEvent.error)} // Xử lý lỗi tải ảnh
+                />
+            ) : (
+                <Text>Không có ảnh để hiển thị</Text>
+            )}
+        </View>
+    </TouchableWithoutFeedback>
+</Modal>
+
     </ScrollView>
   );
 }
@@ -441,14 +481,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    marginLeft:50,
+    marginLeft: 50,
   },
   buttonLogout: {
     backgroundColor: '#FF6347',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    marginRight:70,
+    marginRight: 70,
   },
   buttonText: {
     color: '#fff',
@@ -546,5 +586,30 @@ const styles = StyleSheet.create({
     marginBottom: 15, // Khoảng cách giữa các input
     backgroundColor: '#fff', // Màu nền của input
     color: '#000', // Màu chữ
+  },
+  imageModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',  // Nền mờ phía sau
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullscreenImage: {
+    width: '90%',
+    height: '70%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 150,
+    right: 20,
+    backgroundColor: '#FF4500',
+    padding: 10,
+    borderRadius: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  closeButtonIcon: {
+
   },
 });
