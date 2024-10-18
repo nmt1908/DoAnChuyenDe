@@ -241,6 +241,7 @@ export default function AccountScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập mật khẩu hiện tại"
+                placeholderTextColor="#000"
                 secureTextEntry={!showCurrentPassword} // Điều khiển hiển thị/ẩn
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
@@ -255,6 +256,7 @@ export default function AccountScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập mật khẩu mới"
+                placeholderTextColor="#000"
                 secureTextEntry={!showNewPassword}
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -269,6 +271,7 @@ export default function AccountScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 placeholder="Xác nhận mật khẩu mới"
+                placeholderTextColor="#000"
                 secureTextEntry={!showConfirmPassword}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}

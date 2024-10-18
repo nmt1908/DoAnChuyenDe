@@ -232,7 +232,7 @@ export default function AdminHomeScreen({ navigation }) {
                   <Text style={styles.productName}>{product.tenSP}</Text>
                   <Text style={styles.productPrice}>{product.giaBan.toLocaleString()}đ</Text>
                   <View style={styles.ratingContainer}>
-                    <Text>{product.danhGia}</Text>
+                    <Text style={styles.ratingMark}>{product.danhGia}</Text>
                     <View style={styles.starContainer}>
                       {renderStars(product.danhGia)}
                     </View>
@@ -385,5 +385,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: 'gray'
-  }
+  },
+  ratingMark:{
+    color:'#000',
+  },
 });
