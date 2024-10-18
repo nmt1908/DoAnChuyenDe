@@ -96,6 +96,7 @@ const HomeTab = () => {
         name="Tài khoản"
         component={AccountScreen}
       />
+      
     </Tab.Navigator>
   );
 };

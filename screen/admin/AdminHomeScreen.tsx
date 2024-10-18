@@ -157,7 +157,7 @@ export default function AdminHomeScreen({ navigation }) {
                     onPress={() => setSelectedCategoryId(prevId => prevId === category.id ? null : category.id)}
                   >
                     <Image source={{ uri: category.urlAnh }} style={styles.categoryIcon} />
-                    <Text>{category.tenDanhMuc}</Text>
+                    <Text style={styles.categoryName}>{category.tenDanhMuc}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -176,7 +176,7 @@ export default function AdminHomeScreen({ navigation }) {
                     onPress={() => setSelectedBrandId(prevId => prevId === brand.id ? null : brand.id)}
                   >
                     <Image source={{ uri: brand.urlAnh }} style={styles.categoryIcon} />
-                    <Text>{brand.tenHang}</Text>
+                    <Text style={styles.brandName}>{brand.tenHang}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -199,7 +199,7 @@ export default function AdminHomeScreen({ navigation }) {
 
           {/* Product Header and Filter */}
           <View style={styles.productHeader}>
-            <Text style={styles.productTitle}>Menu Sản Phẩm</Text>
+            <Text style={styles.productTitle} >Menu Sản Phẩm</Text>
             <TouchableOpacity style={styles.filterButton}>
               <Icon name="filter" size={20} color="#000" />
               <Text style={styles.filterText}>Lọc</Text>
@@ -255,7 +255,7 @@ export default function AdminHomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff' 
+    backgroundColor: '#fff'
   },
   container2: {
     marginBottom: 85
@@ -266,7 +266,8 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10
+    marginBottom: 10,
+    color: '#000',
   },
   categoryRow: {
     flexDirection: 'row',
@@ -285,6 +286,12 @@ const styles = StyleSheet.create({
     height: 60,
     marginBottom: 5
   },
+  brandName:{
+    color:'#000',
+  },
+  categoryName:{
+    color:'#000',
+  },
   bannerContainer: {
     marginVertical: 10,
     alignItems: 'center',
@@ -295,19 +302,88 @@ const styles = StyleSheet.create({
     height: 150,
     resizeMode: 'contain'
   },
-  carouselItem: { justifyContent: 'center', alignItems: 'center' },
-  productHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 20 },
-  productTitle: { fontSize: 18, fontWeight: 'bold' },
-  productContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 20 },
-  productItem: { width: '48%', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 10, marginBottom: 10, elevation: 5 },
-  productImage: { width: 120, height: 120, marginBottom: 10, resizeMode: 'contain' },
-  productName: { fontSize: 14, fontWeight: 'bold', marginBottom: 5, textAlign: 'center' },
-  productPrice: { fontSize: 16, color: 'red', marginBottom: 5 },
-  ratingContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  starContainer: { flexDirection: 'row', marginLeft: 5 },
-  addToCartButton: { backgroundColor: '#ff4500', paddingVertical: 8, paddingHorizontal: 10, borderRadius: 5 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 12 },
-  filterButton: { flexDirection: 'row', alignItems: 'center' },
-  filterText: { marginLeft: 5, fontSize: 16, color: '#000', fontWeight: 'bold' },
-  noResultsText: { textAlign: 'center', marginTop: 20, fontSize: 16, color: 'gray' }
+  carouselItem: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  productHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20
+  },
+  productTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color:'#000',
+  },
+  productContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20
+  },
+  productItem: {
+    width: '48%',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    elevation: 5
+  },
+  productImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 10,
+    resizeMode: 'contain'
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'center',
+    color: '#000',
+  },
+  productPrice: {
+    fontSize: 16,
+    color: 'red',
+    marginBottom: 5
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  starContainer: {
+    flexDirection: 'row',
+    marginLeft: 5
+  },
+
+  addToCartButton: {
+    backgroundColor: '#ff4500',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  filterText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: '#000',
+    fontWeight: 'bold'
+  },
+  noResultsText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: 'gray'
+  }
 });

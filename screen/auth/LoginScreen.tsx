@@ -161,6 +161,7 @@ export default function LoginScreen({ navigation }) {
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
+                    placeholderTextColor="#000"
                     value={loginCredential}
                     onChangeText={setLoginCredential}
                     autoCapitalize="none"
@@ -171,6 +172,7 @@ export default function LoginScreen({ navigation }) {
                     <TextInput
                         style={styles.inputPassword}
                         placeholder="Mật khẩu"
+                        placeholderTextColor="#000"
                         secureTextEntry={!showPassword} // Điều khiển hiển thị/ẩn mật khẩu
                         value={password}
                         onChangeText={setPassword}
@@ -236,6 +238,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginBottom: 10,
         fontSize: 16,
+        color: '#000',
     },
     passwordInputContainer: {
         width: '100%',
@@ -250,6 +253,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 50,
         fontSize: 16,
+        color: '#000',
     },
     forgotPassword: {
         alignSelf: 'flex-end',

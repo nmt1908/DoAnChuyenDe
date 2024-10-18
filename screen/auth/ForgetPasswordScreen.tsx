@@ -95,6 +95,7 @@ export default function ForgetPasswordScreen({ navigation }) {
                 <TextInput
                     style={styles.input}
                     placeholder="Nhập email của bạn"
+                    placeholderTextColor="#000"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -152,6 +153,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginBottom: 10,
         fontSize: 16,
+        color:'#000',
     },
     loginButton: {
         backgroundColor: '#FF4500',

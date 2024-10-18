@@ -120,6 +120,7 @@ export default function RegisterScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Tên người dùng"
+          placeholderTextColor="#000"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
@@ -127,6 +128,7 @@ export default function RegisterScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Địa chỉ email"
+          placeholderTextColor="#000"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -135,6 +137,7 @@ export default function RegisterScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Số điện thoại"
+          placeholderTextColor="#000"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
@@ -142,6 +145,7 @@ export default function RegisterScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Địa chỉ"
+          placeholderTextColor="#000"
           value={address}
           onChangeText={setAddress}
         />
@@ -150,6 +154,7 @@ export default function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.inputPassword}
             placeholder="Nhập mật khẩu"
+            placeholderTextColor="#000"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
@@ -165,6 +170,7 @@ export default function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.inputPassword}
             placeholder="Nhập lại mật khẩu"
+            placeholderTextColor="#000"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
@@ -220,6 +226,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 15,
     fontSize: 16,
+    color: '#000',
   },
   passwordInputContainer: {
     width: '100%',
@@ -234,6 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     fontSize: 16,
+    color: '#000',
   },
   registerButton: {
     backgroundColor: '#FF4500',
